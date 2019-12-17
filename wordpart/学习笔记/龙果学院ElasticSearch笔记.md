@@ -809,7 +809,7 @@
 
 # 五、聚合数据分析
 
-## 33
+## 33.bucket metric基本使用
 
 1. bucket与metric概念讲解
 
@@ -819,5 +819,407 @@
 
 2. 聚合统计：
 
-   1. 
+   ```shell
+   # 根据颜色分组（=count(color)）
+   GET /tvs/_search
+   {
+     "size": 0,
+     "aggs": {
+       "popular_colors": {
+         "terms": {
+           "field":"color"
+         }
+       }
+     }
+   }
+   
+   # 根据颜色分组，并计算每个分组的平均价格（=avg(price) group by(color)）,最高价格（=max(price) group by(color)），最低价格（=min(price) group by(color)），价格总和（=sum(price) group by(color)）
+   GET /tvs/_search
+   {
+     "size": 0,
+     "aggs": {
+       "colors": {
+         "terms": {"field":"color"},
+         "aggs":{
+           "avg_price":{"avg":{"field":"price"}},
+           "min_price":{"min":{"field":"price"}},
+           "max_price":{"max":{"field":"price"}},
+           "sum_price":{"sum":{"field":"price"}}
+         }
+       }
+     }
+   }
+   
+   # 直方图统计,以2000为统计区间，统计每个区间的价格总和
+   GET /tvs/_search
+   {
+     "size": 0,
+     "aggs": {
+       "price": {
+         "histogram": {
+           "field":"price",
+           "interval":2000			# 分组间隔
+         },
+         "aggs":{
+           "revenue":{
+             "sum":{
+               "field":"price"
+             }
+           }
+         }
+       }
+     }
+   }
+   
+   # 日期直方图
+   #  Calendar intervals can only be specified in "singular" quantities of the unit (1d, 1M, etc). Multiples, such as 2d, are not supported and will throw an exception
+   GET /tvs/_search
+   {
+   	"size" : 0,
+   	"aggs" : {
+   		"sales" : {
+   			"date_histogram" : {
+   				"field" : "sold_date",
+   				"calendar_interval" : "month",
+   				"format" : "yyyy-MM-dd",
+   				"min_doc_count" : 0,
+   				"extended_bounds" : {
+   					"min" : "2016-01-01",
+   					"max" : "2017-12-31"
+   				}
+   			}
+   		}
+   	}
+   }
+   # In contrast to calendar-aware intervals, fixed intervals are a fixed number of SI units and never deviate, regardless of where they fall on the calendar.This allows fixed intervals to be specified in any multiple of the supported units.
+   GET /tvs/_search
+   {
+     "size": 0,
+     "aggs":{
+       "sales":{
+         "date_histogram":{
+           "field":"sold_date",
+           "fixed_interval":"30d",
+           "format":"yyyy-MM-dd",
+           "min_doc_count":0,
+           "extended_bounds":{
+             "min":"2016-01-01",
+             "max":"2017-12-31"
+           }
+         }
+       }
+     }
+   }
+   
+   ```
+   
+   
 
+## 41. 搜索和聚合结合使用
+
+1. 对查询结果的scope之中进行聚合操作
+
+   ```shell
+   GET /tvs/_search
+   {
+     "size": 0,
+     "query":{
+       "term": {
+         "brand": {
+           "value": "小米"
+         }
+       }
+     },
+     "aggs": {
+       "group_by_color": {
+         "terms": {
+           "field":"color"
+         }
+       }
+     }
+   }
+   ```
+
+   
+
+2. 在查询结果的范围中对全局数据进行聚合统计
+
+   global ： global bucket，将所有数据纳入聚合的scope中
+
+   ```shell
+   GET /tvs/_search
+   {
+     "size": 0,
+     "query":{
+       "term": {
+         "brand": {
+           "value": "长虹"
+         }
+       }
+     },
+     "aggs": {
+       "single_avg_price": {
+         "avg": {
+           "field":"price"
+         }
+       },
+       "all":{
+         "global":{},		# 重置scope为全局scope
+         "aggs":{
+           "avg_price":{
+             "avg":{
+               "field":"pric"
+             }
+           }
+         }
+       }
+     }
+   }
+   ```
+
+   
+
+3. 统计前进行scope限定，通过filter限定scope范围
+
+   ```
+   GET /tvs/_search
+   {
+     "size": 0,
+     "query": {
+       "term": {
+         "brand": {
+           "value": "长虹"
+         }
+       }
+     },
+     "aggs": {
+       "recent_one_month": {
+         "filter":{
+           "range":{
+             "sold_date":{
+               "gte":"now-1200d"
+             }
+           }
+         },
+         "aggs": {
+           "avg_price":{
+             "avg":{
+               "field":"price"
+             }
+           }
+         }
+       }
+     }
+   }
+   ```
+
+   
+
+## 44.下钻分析中的排序问题
+
+1. 按颜色的平均销售额升序排序
+
+   ```shell
+   GET /tvs/_search
+   {
+     "size": 0,
+     "aggs": {
+       "group_by_color": {
+         "terms": {
+           "field":"color",
+           "order":{
+             "avg_price":"asc"		# 重设排序规则
+           }
+         },
+         "aggs":{
+           "avg_price":{
+             "avg":{
+               "field":"price"
+             }
+           }
+         }
+       }
+     }
+   }
+   ```
+
+   
+
+## 47.近似聚合算法(cardinality + percentiles + percentile ranks)
+
+三角选择原则
+
+1. 精准+实时 ： 数据量不大，一般数据统计可以在单机运行得出结果
+2. 精准+大数据 ： hadoop等批处理操作，精准但延时非常大
+3. 大数据+实时： 近似估计，可能会有百分之几的错误率
+
+近似估计算法
+
+1. cartinality去重近似估计算法
+
+   ```
+   GET /tvs/_search
+   {
+     "size": 0,
+     "aggs": {
+       "months": {
+         "date_histogram": {
+           "field":"sold_date",
+           "calendar_interval":"month",
+           "format":"yyyy-MM-dd"
+         },
+         "aggs":{
+           "distinct_colors":{
+             "cardinality":{
+               "field":"brand"
+             }
+           }
+         }
+       }
+     }
+   }
+   ```
+
+   算法优化内存开销以及HLL算法：
+
+   ​	precision_threshole：如果数据的unique value小于precision_threshole，那么cardinality几乎能够保证100%准确；并且只会占用precision_threshole * 8 byte的内存消耗`（precision_threshole值可以调整得更大）` ；就算实际数据有数百万个unique value，统计的错误率只会在5%以内；
+
+   ```shell
+   GET /tvs/_search
+   {
+     "size": 0,
+     "aggs": {
+       "distinct_brand": {
+         "cardinality": {
+           "field":"brand",
+           "precision_threshold":100
+         }
+       }
+     }
+   }
+   ```
+
+   ​	HyperLogLog++算法优化：HLL算法是cardinality的底层算法。默认情况下，发送一个cardinality请求的时候，会**动态地对所有field value取hash值**；如果对cardinality的性能有比较高的要求，可以**将取hash值的操作前移到建立索引的时候**。
+
+   ```shell
+   PUT /tvs
+   {
+     "mappings": {
+       "properties": {
+         "brand":{
+           "type": "text",
+           "fields": {
+             "hash":{
+               "type":"murmur3"		# 一种取hash值的方法
+             }
+           }
+         }
+       }
+     }
+   }
+   
+   GET /tvs/_search
+   {
+     "size": 0,
+     "aggs": {
+       "distinct_brand": {
+         "cardinality": {
+           "field":"brand.hash",		# cardinality的时候使用hash字段
+           "precision_threshold":100
+         }
+       }
+     }
+   }
+   ```
+
+   
+
+2. percentiles百分比算法以及网站访问时延统计
+
+   ```shell
+   # 对latency字段进行tp50,tp90,tp99计算
+   GET /website/_search
+   {
+     "size": 0,
+     "aggs": {
+       "latency_percentiles": {
+         "percentiles": {
+           "field":"latency",
+           "percents":[
+             50,
+             90,
+             99
+             ]
+         }
+       },
+       "latency_avg":{
+           "avg":{
+             "field":"latency"
+           }
+       }
+     }
+   }
+   
+   # 对每个省份进行tp50，tp90，tp99统计
+   GET /website/_search
+   {
+   	"size": 0,
+   	"aggs": {
+   		"grouy_by_province": {
+   			"terms": {
+   				"field": "province"
+   			},
+   			"aggs": {
+   				"latency_percentiles": {
+   					"percentiles": {
+   						"field": "latency",
+   						"percents": [
+   							50,
+   							90,
+   							99
+   						]
+   					}
+   				},
+   				"latency_avg": {
+   					"avg": {
+   						"field": "latency"
+   					}
+   				}
+   			}
+   		}
+   
+   	}
+   }
+   ```
+
+   
+
+3. percentile ranks以及网站访问时延SLA统计
+
+   SLA ： 提供的服务的标准。
+
+   我们的网站的提供的访问延时的SLA，确保所有的请求100%在200ms以内。
+
+   ```shell
+   GET /website/_search
+   {
+     "size": 0,
+     "aggs": {
+       "group_by_province": {
+         "terms": {
+           "field":"province"
+         },
+         "aggs":{
+           "lantency_percentile_ranks":{
+             "percentile_ranks":{
+               "field":"latency",
+               "values":[200,1000]
+             }
+           }
+         }
+       }
+     }
+   }
+   ```
+
+   
