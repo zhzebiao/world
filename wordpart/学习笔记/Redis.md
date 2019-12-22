@@ -111,28 +111,28 @@
 
    
 
-## 三、 Hash数据结构
+5. Hash数据结构
 
-redis hash是一个string类型的field和value的映射表，特别适合用于存储对象。
+   redis hash是一个string类型的field和value的映射表，特别适合用于存储对象。
 
-![](F:\world\学习笔记\pic\redis hash.png)
+   ![](F:\world\学习笔记\pic\redis hash.png)
 
-hash的基本操作和redis的字符串类型基本操作相似：
+   hash的基本操作和redis的字符串类型基本操作相似：
 
-```
-hkeys key			# 获取键的所有字段
-hexists key field	# 判断键是否存在特定字段
-hdel key field [field2...]		# 删除键的特定字段
-hget key field		# 获取键的特定字段的值
-hgetall key			# 获取键的所有字段的值
-hincrby key field increament	# 将键的特定字段的整数值增加特定数
-hset key field value			# 设置键的字段值
-...
-```
+   ```shell
+   hkeys key			# 获取键的所有字段
+   hexists key field	# 判断键是否存在特定字段
+   hdel key field [field2...]		# 删除键的特定字段
+   hget key field		# 获取键的特定字段的值
+   hgetall key			# 获取键的所有字段的值
+   hincrby key field increament	# 将键的特定字段的整数值增加特定数
+   hset key field value			# 设置键的字段值
+   ...
+   ```
 
+   
 
-
-## 四、生存时间
+## 三、生存时间
 
 1. 设置生存时间
 
@@ -152,7 +152,7 @@ hset key field value			# 设置键的字段值
 
    
 
-## 五、事务
+## 四、事务
 
 ​	redis事务可以一次执行多个命令，并且带有一下两个重要的保证：
 
