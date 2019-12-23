@@ -1223,3 +1223,264 @@
    ```
 
    
+
+## 53. 基于doc value正排索引的聚合内部原理 
+
+1. doc value原理
+
+   1. index-time生成。PUT/POST的时候，就会生成doc value数据（正排索引）；
+
+   2. 核心原理和倒排索引类似
+
+      正排索引也会写入到磁盘文件中，然后用os cache缓存以提升doc value的性能，如果os cache内存大小不足够放得下整个doc value，那么doc value会被flush到磁盘文件中；
+
+   3. 性能问题，给jvm更少的内存
+
+      ES大量使用os cache进行缓存以提升性能，不建议用jvm内存进行缓存，会导致一定的gc开销和oom问题。例如64g的服务器，给jvm最多16g，剩余空间留给os cache。
+
+2. column压缩
+
+   1. 所有值相同，直接保留单值
+   2. 少于256个值，使用table encoding模式
+   3. 大于256个值，看有没有最大公约数，如果有保留最大公约数
+   4. 如果没有最大公约数，采取offset结合压缩的方式
+
+3. disable doc value能够减少磁盘和内存开销
+
+   
+
+## 54. fielddata原理初探
+
+1. 工作原理：
+
+   - 对于不分词的field默认会在建立索引的时候生成doc value，所以不分词的field默认支持聚合操作；
+   - 分词field是没有doc value的。因为分词后占用空间大，默认不支持分词field进行聚合的。如果要对分词field做聚合操作，**必须将fielddata设置为true**。然后es在做聚合操作的时候（search-time），会将field对应的数据建立一份fielddata正排索引，建立好的**fielddata只存在于内存中**。
+
+2. circuit breaker 短路器
+
+   circuit breaker 会估算query要加载的fielddata大小，如果超出总内存，就短路，query直接失败。可以设置一些参数限制聚合时内存使用。
+
+   ​	indices.breaker.fielddata.limit：fielddata的内存限制，默认60%
+   ​	indices.breaker.request.limit：执行聚合的内存限制，默认40%
+   ​	indices.breaker.total.limit：综合上面两个，限制在70%以内
+
+3. fielddata filter的使用
+
+   ```shell
+   POST /test_index/_mapping/my_type
+   {
+     "properties": {
+       "my_field": {
+         "type": "text",
+         "fielddata": { 
+           "filter": {
+             "frequency": { 
+               "min":              0.01, 
+               "min_segment_size": 500  
+             }
+           }
+         }
+       }
+     }
+   }
+   # min：仅仅加载至少在1%的doc中出现过的term对应的fielddata
+   # min_segment_size：少于500 doc的segment不加载fielddata
+   ```
+
+   
+
+## 58. bucket优化机制：从深度优先到广度优先
+
+1. 广度优先示例：
+
+   ```shell
+   {
+     "aggs" : {
+       "actors" : {
+         "terms" : {
+            "field" :        "actors",
+            "size" :         10,
+            "collect_mode" : "breadth_first" 
+         },
+         "aggs" : {
+           "costars" : {
+             "terms" : {
+               "field" : "films",
+               "size" :  5
+             }
+           }
+         }
+       }
+     }
+   }
+   ```
+
+   默认的聚合采用的是深度优先的模式。多层聚合的时候会先构建出一棵聚合树，然后从下到上进行裁剪。在某些场景下，裁剪掉的部分占构建出来的聚合树的绝大部分，这样会造成资源浪费。而广度优先模式，是边聚合边裁剪的，能够有效避免无用的聚合树的构建。
+
+   
+
+
+# 六、 数据建模实战
+
+## 59. Elasticsearch document类型数据建模
+
+1. 关系型与document类型数据模型对比
+
+   举个例子，在java里面存在的两个实例对象：
+
+   ```java
+   public class Department {
+   	
+   	private Integer deptId;
+   	private String name;
+   	private String desc;
+   	private List<Employee> employees;
+   
+   }
+   
+   public class Employee {
+   	
+   	private Integer empId;
+   	private String name;
+   	private Integer age;
+   	private String gender;
+   	private Department dept;
+   
+   }
+   ```
+
+   在关系型数据库中会映射成两个表，建表符合三范式：
+
+   ![](F:\world\学习笔记\pic\es 数据建模 关系型数据库表.jpg)
+
+   在Elasticsearch文档数据模型中，整个数据会放在一个doc中：
+
+   ```json
+   {
+   	"deptId": "1",
+   	"name": "研发部门",
+   	"desc": "负责公司的所有研发项目",
+   	"employees": [
+   		{
+   			"empId": "1",
+   			"name": "张三",
+   			"age": 28,
+   			"gender": "男"
+   		},
+   		{
+   			"empId": "2",
+   			"name": "王兰",
+   			"age": 25,
+   			"gender": "女"
+   		},
+   		{
+   			"empId": "3",
+   			"name": "李四",
+   			"age": 34,
+   			"gender": "男"
+   		}
+   	]
+   }
+   ```
+
+   
+
+2. 一般来说，对于es这种NoSQL类型的数据存储来讲，都是采用冗余模式存储关系型数据。
+
+3. **对文件系统进行数据建模**：
+
+   ```shell
+   PUT /fs
+   {
+     "settings": {
+       "analysis": {
+         "analyzer": {
+           "paths": { 
+             "tokenizer": "path_hierarchy" 
+           }
+         }
+       }
+     }
+   }
+   # path_hierarchy是一个根据/进行前缀切分的分词器，例如：/a/b/c会被切分为/a/b/c、/a/b、/a
+   PUT /fs/_mapping/
+   {
+     "properties": {
+       "name": { 
+         "type":  "keyword"
+       },
+       "path": { 
+         "type":  "keyword",
+         "fields": {
+           "tree": { 
+             "type":     "text",
+             "analyzer": "paths"
+           }
+         }
+       }
+     }
+   }
+   ```
+
+   
+
+## 65. 并发控制实现
+
+1. 基于document锁实现悲观锁并发控制
+
+   ```shell
+   # 在elasticsearch的script目录创建scripts/judge-lock.groovy: if ( ctx._source.process_id != process_id ) { assert false }; ctx.op = 'noop';
+   # 使用锁index对另一个索引fs进行加锁
+   POST /lock/_doc/1/_update
+   {
+     "upsert": { "process_id": 123 },
+     "script": {
+       "lang": "groovy",
+       "file": "judge-lock", 
+       "params": {
+         "process_id": 123
+       }
+     }
+   }
+   # 1. 如果/lock/没有对id=1加锁的记录，则用process_id=123标记并生成id=1的锁记录；
+   # 2. 如果已存在id=1的记录，则执行script脚本：如果存在的process_id和传入的process_id不相同，则assert false，然后op='noop'（什么都不操作）
+   ```
+
+   process_id：lock中的重要字段，是进行增删改查的进程的唯一id。
+
+   
+
+2. 基于共享锁和排他锁实现悲观锁并发控制
+
+   ```shell
+   # judge-lock-2.groovy: if (ctx._source.lock_type == 'exclusive') { assert false }; ctx._source.lock_count++
+   # 共享锁每次获取的时候进行++lock_count操作
+   POST /fs/lock/1/_update 
+   {
+     "upsert": { 
+       "lock_type":  "shared",
+       "lock_count": 1
+     },
+     "script": {
+     	"lang": "groovy",
+     	"file": "judge-lock-2"
+     }
+   }
+   
+   # unlock-shared.groovy: if(--ctx._source.lock_count == 0){ctx.op='delete'}
+   # 每次释放共享锁的时候--lock_count，当lock_count为0的时候，删除锁记录；
+   POST /fs/lock/1/_update
+   {
+     "script": {
+     	"lang": "groovy",
+     	"file": "unlock-shared"
+     }
+   }
+   
+   # 排他锁只能通过create语法创建
+   PUT /fs/lock/1/_create
+   { "lock_type": "exclusive" }
+   ```
+
+   
+
