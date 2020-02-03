@@ -1484,3 +1484,82 @@
 
    
 
+# 七、生产集群部署
+
+参数调节：
+
+```shell
+# 增加文件句柄
+vim /etc/security/limits.conf
+* soft nofile 65536
+* hard nofile 65536
+
+# 关闭交换空间
+# 1、禁用所有的swapping file
+swapoff -a
+# 2、配置swappiness
+sysctl -w vm.swappiness=1
+# 3、启用bootstrap.memory_lock
+vim config/elasticsearch.yml
+bootstrap.memory_lock: true
+vim /etc/security/limits.conf
+*	soft	memlock	unlimited
+*	hard	memlock	unlimited
+
+# 虚拟内存，提升mmap count的限制
+sysctl -w vm.max_map_count=262144
+# 修改/etc/sysctl.conf
+vm.max_map_count=262144
+vim /etc/security/limits.conf
+*	hard	as	unlimited
+
+# 设置线程数量
+vim /etc/security/limits.conf
+*	hard	nproc	2048
+```
+
+
+
+# 八、索引管理
+
+1. 压缩索引
+
+   因为shard涉及到document的hash路由问题，所以不允许增加primary shard数量的。如果要减少shard数量，压缩后的shard数量必须可以被原来的shard数量整除。
+
+   - shrink工作流程：
+
+     1. 创建一个分片数量为指定数量、定义和source index相同的target index；
+     2. 将source index的segement file用hard-link的方式连接到target index的segment file上。如果操作系统不支持hard-link，那么将会采用copy的方式将segment file拷贝到target index的data dir中；
+     3. target index进行shard recovery恢复
+
+   - shrink的具体操作
+
+     1. 将source index设为read only，并将所有的shard的一个副本移动到同个节点上；
+
+        ```shell
+        curl -XPUT 'http://elasticsearch02:9200/twitter/_settings?pretty' -d '
+        {
+          "settings": {
+            "index.routing.allocation.require._name": "node-elasticsearch-02", 
+            "index.blocks.write": true 
+          }
+        }'
+        ```
+
+        
+
+     2. 执行shrink命令
+
+        ```shell
+        curl -XPOST 'http://elasticsearch02:9200/twitter/_shrink/target_index?pretty' -d '
+        {
+          "settings": {
+            "index.number_of_replicas": 1,
+            "index.number_of_shards": 1, 
+            "index.codec": "best_compression" 
+          }
+        }'
+        ```
+
+   2. 
+
