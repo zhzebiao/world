@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+    <context:annotation-config/>
+
+
+        <bean id="helloWorld" class="world.tutorialspoint.HelloWorld">
+            <property name="message" value="Hello World!"/>
+        </bean>
+
+    <!--    &lt;!&ndash;    beanTemplate parent&ndash;&gt;-->
+    <!--    <bean id="beanTemplate" abstract="true">-->
+    <!--        <property name="message1" value="Hello World!"/>-->
+    <!--    </bean>-->
+    <!--    <bean id="helloindia" class="world.tutorialspoint.HelloIndia" parent="beanTemplate">-->
+    <!--        <property name="message2" value="message2"/>-->
+    <!--        <property name="message3" value="message3"/>-->
+    <!--    </bean>-->
+    <!--    &lt;!&ndash;    BeanProcessor&ndash;&gt;-->
+    <!--    <bean class="world.tutorialspoint.InitHelloWorld"/>-->
+
+
+    <!--    &lt;!&ndash;    constructor-based DI&ndash;&gt;-->
+    <!--    <bean id="textEditor" class="world.tutorialspoint.TextEditor">-->
+    <!--        <constructor-arg ref="spellChecker"/>-->
+    <!--    </bean>-->
+    <!--    <bean id="spellChecker" class="world.tutorialspoint.SpellChecker"/>-->
+    <!--    &lt;!&ndash;    setter-based DI&ndash;&gt;-->
+    <!--    <bean id="textEditor2" class="world.tutorialspoint.TextEditor">-->
+    <!--        <property name="spellChecker" ref="spellChecker"/>-->
+    <!--    </bean>-->
+
+    <!--    <bean id="textEditor3" class="world.tutorialspoint.TextEditor">-->
+    <!--        <property name="spellChecker">-->
+    <!--            <bean id="spellChecker" class="world.tutorialspoint.SpellChecker"/>-->
+    <!--        </property>-->
+    <!--    </bean>-->
+
+
+    <!--    <bean id="javaCollection" class="world.tutorialspoint.JavaCollection">-->
+    <!--        <property name="addressList">-->
+    <!--            <list>-->
+    <!--                <value>INDIA</value>-->
+    <!--                <value>Pakistan</value>-->
+    <!--                <value>USA</value>-->
+    <!--                <value>USA</value>-->
+    <!--            </list>-->
+    <!--        </property>-->
+    <!--        <property name="addressSet">-->
+    <!--            <set>-->
+    <!--                <value>INDIA</value>-->
+    <!--                <value>Pakistan</value>-->
+    <!--                <value>USA</value>-->
+    <!--                <value>USA</value>-->
+    <!--            </set>-->
+    <!--        </property>-->
+    <!--        <property name="addressMap">-->
+    <!--            <map>-->
+    <!--                <entry key="1" value="INDIA"/>-->
+    <!--                <entry key="2" value="Pakistan"/>-->
+    <!--                <entry key="3" value="USA"/>-->
+    <!--                <entry key="4" value="USA"/>-->
+    <!--            </map>-->
+    <!--        </property>-->
+    <!--        <property name="addressProp">-->
+    <!--            <props>-->
+    <!--                <prop key="one">INDIA</prop>-->
+    <!--                <prop key="two">Pakistan</prop>-->
+    <!--                <prop key="three">USA</prop>-->
+    <!--                <prop key="four">USA</prop>-->
+    <!--            </props>-->
+    <!--        </property>-->
+    <!--    </bean>-->
+
+    <bean id="textEditor" class="world.tutorialspoint.TextEditor"/>
+    <bean id="spellChecker" class="world.tutorialspoint.SpellChecker"/>
+
+    <bean id="student" class="world.tutorialspoint.Student">
+
+        <property name="name" value="Eugene"/>
+    </bean>
+
+
+    <bean id="customEventPublisher" class="world.tutorialspoint.CustomEventPublisher"/>
+    <bean id="customEventHandler" class="world.tutorialspoint.CustomEventHandler"/>
+</beans>
