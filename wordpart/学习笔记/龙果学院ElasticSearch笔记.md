@@ -623,7 +623,7 @@
                  · idf(t)2      
                  · t.getBoost() 
                  · norm(t,d)    
-               ) (t in q) 
+               ) ·(t in q) 
    ```
 
    $$
@@ -635,7 +635,7 @@
                  · idf(t)2      
                  · t.getBoost() 
                  · norm(t,d)    
-               ) (t in q)
+               ) ·(t in q)
    $$
 
    

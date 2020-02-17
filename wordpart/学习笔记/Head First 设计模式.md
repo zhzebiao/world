@@ -287,5 +287,45 @@ public class ConcreteIterator implements Iterator {
 }
 ```
 
+​	**组合模式**能够满足对象以树状层次嵌套的数据结构实现。
 
+​	**组合模式**允许你将对象组合成树形结构来表现“整体/部分”层次结构。组合能让客户以一致的方式处理个别对象以及对象组合。
+
+```java
+public abstract class Component {
+    public void operation(){
+        throw new UnsupportedOperationException();
+    }
+    public void add(Component c){
+        throw new UnsupportedOperationException();
+    }
+    public void remove(Component c){
+        throw new UnsupportedOperationException();
+    }
+    public Component getChild(int index){
+        throw new UnsupportedOperationException();
+    }
+}
+
+public class Composite extends Component {
+    public void operation(){
+        // 具体实现
+    }
+    public void add(Component c){
+        // 具体实现
+    }
+    public void remove(Component c){
+        // 具体实现
+    }
+    public Component getChild(int index){
+        // 具体实现
+    }
+}
+
+public class Leaf extends Component {
+    public void operation(){
+        // 具体实现
+    }
+}
+```
 
