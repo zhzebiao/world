@@ -1,0 +1,12 @@
+
+# 统计方式（可选项为mysql\file,多个可用逗号分隔）
+statType=file
+# 统计文件(statType=file时生效，default=./logs/statisticData/
+statFolder=
+# 数据库连接信息(statType=mysql时生效)
+driverClassName=org.postgresql.Driver
+url=jdbc:postgresql://68.26.12.35:65432/viad?prepareThreadhold=0
+username=viid
+password=viid@2018
+
+sql=INSERT INTO bigdata_statistic(type,table_name,time_str,place,number) VALUES (?,?,?,?,?)

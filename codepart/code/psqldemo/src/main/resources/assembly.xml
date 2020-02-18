@@ -1,0 +1,50 @@
+<!-- Assembly 插件的配置信息 -->
+<assembly>
+    <id>${project.version}</id>
+    <!-- 打包后的文件格式, 也可以是war、zip等 -->
+    <formats>
+        <format>tar.gz</format>
+    </formats>
+    <!-- 打包后的文件中是否生成和项目名相同的根目录 -->
+    <includeBaseDirectory>true</includeBaseDirectory>
+    <fileSets>
+        <fileSet>
+            <directory>${project.basedir}/bin</directory>
+            <outputDirectory>bin</outputDirectory>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/logs</directory>
+            <outputDirectory>logs</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/lib</directory>
+            <outputDirectory>lib</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/src/main/resources</directory>
+            <outputDirectory>conf</outputDirectory>
+            <includes>
+                <include>**/*.properties</include>
+                <include>**/*.setting</include>
+                <include>**/*.xml</include>
+                <include>**/*.conf</include>
+                <include>**/*.keytab</include>
+            </includes>
+            <!-- 排除打包的配置文件 -->
+            <excludes>
+                <exclude>assembly.xml</exclude>
+            </excludes>
+        </fileSet>
+    </fileSets>
+    <dependencySets>
+        <dependencySet>
+            <!-- 是否把本项目添加到依赖文件夹下 -->
+            <useProjectArtifact>true</useProjectArtifact>
+            <!-- 将scope为runtime/provider的依赖包打包到lib目录下 -->
+            <scope>runtime</scope>
+            <outputDirectory>lib</outputDirectory>
+        </dependencySet>
+    </dependencySets>
+
+</assembly>
