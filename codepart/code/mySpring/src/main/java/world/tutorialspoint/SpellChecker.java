@@ -1,9 +1,12 @@
 package world.tutorialspoint;
 
+import org.springframework.stereotype.Component;
+
 /**
  * @author zhengzebiao
  * @date 2020/2/12 23:29
  */
+@Component
 public class SpellChecker {
 
     public SpellChecker(){

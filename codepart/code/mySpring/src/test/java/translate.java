@@ -1,7 +1,11 @@
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Iterator;
 
@@ -9,25 +13,13 @@ import java.util.Iterator;
  * @author zhengzebiao
  * @date 2020/2/12 14:11
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:Beans.xml")
 public class translate {
-    public static void main(String[] args) {
-        String[] words = new String[]{"FaceID", "InfoKind", "SourceID", "DeviceID", "LeftTopX", "LeftTopY", "RightBtmX", "RightBtmY", "LocationMarkTime", "FaceAppearTime", "FaceDisAppearTime", "IDType", "IDNumber", "Name", "UsedName", "Alias", "GenderCode", "AgeUpLimit", "AgeLowerLimit", "EthicCode", "NationalityCode", "NativeCityCode", "ResidenceAdminDivision", "ChineseAccentCode", "JobCategory", "AccompanyNumber", "SkinColor", "HairStyle", "HairColor", "FaceStyle", "FacialFeature", "PhysicalFeature", "RespiratorColor", "CapStyle", "CapColor", "GlassStyle", "GlassColor", "IsDriver", "IsForeigner", "PassportType", "ImmigrantTypeCode", "IsSuspectedTerrorist", "SuspectedTerroristNumber", "IsCriminalInvolved", "CriminalInvolvedSpecilisationCode", "BodySpeciallMark", "CrimeMethod", "CrimeCharacterCode", "EscapedCriminalNumber", "IsDetainees", "DetentionHouseCode", "DetaineesIdentity", "DetaineesSpecialIdentity", "MemberTypeCode", "IsVictim", "VictimType", "InjuredDegree", "CorpseConditionCode", "IsSuspiciousPerson", "Attitude", "Similaritydegree", "EyebrowStyle", "NoseStyle", "MustacheStyle", "LipStyle", "WrinklePouch", "AcneStain", "FreckleBirthmark", "ScarDimple", "OtherFeature", "CreateTime", "ShotTime", "AgePhase", "IsGlasses", "IsRespirator", "IsCap", "IsSmile", "FeatureList", "TabID", "SubImageList", "UploadFlag", "UploadTime", "AnalysisFlag", "AnalysisTime", "KiTime", "KoTime"};
 
+    @Test
+    public void test(){
 
-        String beforeTransWords = " {\"column\": [{ \"name\":\"escapedcriminalnumber\",\"type\":\"keyword\"},{ \"name\":\"glasscolor\",\"type\":\"keyword\"},{ \"name\":\"isrespirator\",\"type\":\"integer\"},{ \"name\":\"tabid\",\"type\":\"keyword\"},{ \"name\":\"agephase\",\"type\":\"integer\"},{ \"name\":\"chineseaccentcode\",\"type\":\"keyword\"},{ \"name\":\"idtype\",\"type\":\"keyword\"},{ \"name\":\"issmile\",\"type\":\"integer\"},{ \"name\":\"nosestyle\",\"type\":\"keyword\"},{ \"name\":\"deviceid\",\"type\":\"keyword\"},{ \"name\":\"shottime\",\"type\":\"text\"},{ \"name\":\"corpseconditioncode\",\"type\":\"keyword\"},{ \"name\":\"analysisflag\",\"type\":\"integer\"},{ \"name\":\"mustachestyle\",\"type\":\"keyword\"},{ \"name\":\"createtime\",\"type\":\"text\"},{ \"name\":\"lefttopy\",\"type\":\"integer\"},{ \"name\":\"lefttopx\",\"type\":\"integer\"},{ \"name\":\"scardimple\",\"type\":\"keyword\"},{ \"name\":\"bodyspeciallmark\",\"type\":\"keyword\"},{ \"name\":\"haircolor\",\"type\":\"keyword\"},{ \"name\":\"glassstyle\",\"type\":\"keyword\"},{ \"name\":\"kotime\",\"type\":\"text\"},{ \"name\":\"uploadflag\",\"type\":\"integer\"},{ \"name\":\"respiratorcolor\",\"type\":\"keyword\"},{ \"name\":\"agelowerlimit\",\"type\":\"integer\"},{ \"name\":\"detentionhousecode\",\"type\":\"keyword\"},{ \"name\":\"isglasses\",\"type\":\"integer\"},{ \"name\":\"membertypecode\",\"type\":\"keyword\"},{ \"name\":\"isvictim\",\"type\":\"integer\"},{ \"name\":\"kitime\",\"type\":\"text\"},{ \"name\":\"locationmarktime\",\"type\":\"text\"},{ \"name\":\"featurelist\",\"type\":\"nested\"},{ \"name\":\"infokind\",\"type\":\"integer\"},{ \"name\":\"attitude\",\"type\":\"integer\"},{ \"name\":\"otherfeature\",\"type\":\"keyword\"},{ \"name\":\"faceid\",\"type\":\"keyword\"},{ \"name\":\"wrinklepouch\",\"type\":\"keyword\"},{ \"name\":\"victimtype\",\"type\":\"keyword\"},{ \"name\":\"acnestain\",\"type\":\"keyword\"},{ \"name\":\"sourceid\",\"type\":\"keyword\"},{ \"name\":\"hairstyle\",\"type\":\"keyword\"},{ \"name\":\"storetime\",\"type\":\"text\"},{ \"name\":\"jobcategory\",\"type\":\"keyword\"},{ \"name\":\"facialfeature\",\"type\":\"keyword\"},{ \"name\":\"skincolor\",\"type\":\"keyword\"},{ \"name\":\"similaritydegree\",\"type\":\"double\"},{ \"name\":\"immigranttypecode\",\"type\":\"keyword\"},{ \"name\":\"crimemethod\",\"type\":\"keyword\"},{ \"name\":\"physicalfeature\",\"type\":\"keyword\"},{ \"name\":\"ageuplimit\",\"type\":\"integer\"},{ \"name\":\"subimagelist\",\"type\":\"nested\"},{ \"name\":\"isdriver\",\"type\":\"integer\"},{ \"name\":\"name\",\"type\":\"keyword\"},{ \"name\":\"facestyle\",\"type\":\"keyword\"},{ \"name\":\"residenceadmindivision\",\"type\":\"keyword\"},{ \"name\":\"usedname\",\"type\":\"keyword\"},{ \"name\":\"lipstyle\",\"type\":\"keyword\"},{ \"name\":\"facedisappeartime\",\"type\":\"text\"},{ \"name\":\"issuspectedterrorist\",\"type\":\"integer\"},{ \"name\":\"capcolor\",\"type\":\"keyword\"},{ \"name\":\"isdetainees\",\"type\":\"integer\"},{ \"name\":\"crimecharactercode\",\"type\":\"keyword\"},{ \"name\":\"analysistime\",\"type\":\"text\"},{ \"name\":\"nativecitycode\",\"type\":\"keyword\"},{ \"name\":\"eyebrowstyle\",\"type\":\"keyword\"},{ \"name\":\"passporttype\",\"type\":\"keyword\"},{ \"name\":\"issuspiciousperson\",\"type\":\"integer\"},{ \"name\":\"isforeigner\",\"type\":\"integer\"},{ \"name\":\"detaineesspecialidentity\",\"type\":\"keyword\"},{ \"name\":\"criminalinvolvedspecilisationcode\",\"type\":\"keyword\"},{ \"name\":\"faceappeartime\",\"type\":\"text\"},{ \"name\":\"iscap\",\"type\":\"integer\"},{ \"name\":\"imageids\",\"type\":\"keyword\"},{ \"name\":\"uploadtime\",\"type\":\"text\"},{ \"name\":\"frecklebirthmark\",\"type\":\"keyword\"},{ \"name\":\"iscriminalinvolved\",\"type\":\"integer\"},{ \"name\":\"suspectedterroristnumber\",\"type\":\"keyword\"},{ \"name\":\"accompanynumber\",\"type\":\"integer\"},{ \"name\":\"alias\",\"type\":\"keyword\"},{ \"name\":\"nationalitycode\",\"type\":\"keyword\"},{ \"name\":\"capstyle\",\"type\":\"keyword\"},{ \"name\":\"gendercode\",\"type\":\"keyword\"},{ \"name\":\"injureddegree\",\"type\":\"keyword\"},{ \"name\":\"rightbtmy\",\"type\":\"integer\"},{ \"name\":\"rightbtmx\",\"type\":\"integer\"},{ \"name\":\"ethiccode\",\"type\":\"keyword\"},{ \"name\":\"idnumber\",\"type\":\"keyword\"},{ \"name\":\"detaineesidentity\",\"type\":\"keyword\"}]}";
-
-        JSONObject json = JSON.parseObject(beforeTransWords);
-        JSONArray jsonArray = json.getJSONArray("column");
-        for (Iterator<Object> iterator = jsonArray.iterator(); iterator.hasNext(); ) {
-            JSONObject object = (JSONObject) iterator.next();
-            String value = (String) object.get("name");
-            for (int i = 0; i < words.length; i++) {
-               if(words[i].toLowerCase().equals(value)){
-                   object.put("name",words[i]);
-               }
-            }
-        }
-
-        System.out.println(json.toJSONString());
     }
+
 }

@@ -1,15 +1,21 @@
 package world.tutorialspoint;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Required;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import java.io.Serializable;
 
 /**
  * @author zhengzebiao
  * @date 2020/2/13 14:12
  */
-public class Student {
+@Component
+public class Student implements Serializable {
+    @Value("1")
     private Integer id;
+    @Value("11")
     private Integer age;
+    @Value("Eugene")
     private String name;
 
     public Integer getId() {

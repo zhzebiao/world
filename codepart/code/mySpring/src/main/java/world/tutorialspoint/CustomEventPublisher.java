@@ -2,11 +2,13 @@ package world.tutorialspoint;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.stereotype.Component;
 
 /**
  * @author zhengzebiao
  * @date 2020/2/13 16:41
  */
+@Component
 public class CustomEventPublisher implements ApplicationEventPublisherAware {
 
 

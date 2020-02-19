@@ -1,10 +1,12 @@
 package world.dao;
 
+import java.io.Serializable;
+
 /**
  * @author zhengzebiao
  * @date 2020/2/14 16:01
  */
-public class StudentMarks {
+public class StudentMarks implements Serializable {
     private Integer age;
     private String name;
     private Integer id;

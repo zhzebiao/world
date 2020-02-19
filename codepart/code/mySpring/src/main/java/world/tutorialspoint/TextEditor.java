@@ -1,6 +1,7 @@
 package world.tutorialspoint;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
@@ -8,6 +9,7 @@ import javax.annotation.Resource;
  * @author zhengzebiao
  * @date 2020/2/12 23:28
  */
+@Component
 public class TextEditor {
 
     @Resource

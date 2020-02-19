@@ -13,7 +13,8 @@
 
 
     <aop:aspectj-autoproxy/>
-    <context:annotation-config/>
+    <context:component-scan base-package="world.tutorialspoint"/>
+
 
 <!--    <aop:config>-->
 <!--        <aop:aspect id="log" ref="logging">-->

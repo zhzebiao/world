@@ -11,7 +11,7 @@
     http://www.springframework.org/schema/context
     http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
-    <context:annotation-config/>
+    <context:component-scan base-package="world.tutorialspoint"/>
 
 
         <bean id="helloWorld" class="world.tutorialspoint.HelloWorld">
@@ -82,15 +82,16 @@
     <!--        </property>-->
     <!--    </bean>-->
 
-    <bean id="textEditor" class="world.tutorialspoint.TextEditor"/>
-    <bean id="spellChecker" class="world.tutorialspoint.SpellChecker"/>
+    <!--<bean id="textEditor" class="world.tutorialspoint.TextEditor"/>-->
+    <!--<bean id="spellChecker" class="world.tutorialspoint.SpellChecker"/>-->
 
-    <bean id="student" class="world.tutorialspoint.Student">
+    <!--<bean id="student" class="world.tutorialspoint.Student">-->
 
-        <property name="name" value="Eugene"/>
-    </bean>
+        <!--<property name="name" value="Eugene"/>-->
+    <!--</bean>-->
 
 
-    <bean id="customEventPublisher" class="world.tutorialspoint.CustomEventPublisher"/>
-    <bean id="customEventHandler" class="world.tutorialspoint.CustomEventHandler"/>
+
+    <!--<bean id="customEventPublisher" class="world.tutorialspoint.CustomEventPublisher"/>-->
+    <!--<bean id="customEventHandler" class="world.tutorialspoint.CustomEventHandler"/>-->
 </beans>
