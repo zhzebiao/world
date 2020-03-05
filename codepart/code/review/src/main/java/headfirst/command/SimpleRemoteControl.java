@@ -31,7 +31,6 @@ public class SimpleRemoteControl {
         while (elements.hasMoreElements()) {
             System.out.println(elements.nextElement());
 
-            ArrayList
         }
     }
 }

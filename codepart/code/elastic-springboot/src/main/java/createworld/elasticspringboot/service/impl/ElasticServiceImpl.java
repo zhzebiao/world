@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -65,11 +66,16 @@ public class ElasticServiceImpl implements IElasticService {
 
     @Override
     public Page<DocBean> findBySecondCode(String secordCode) {
-        return repository.findBySecondCode(secordCode,pageable);
+        return repository.findBySecondCode(secordCode, pageable);
     }
 
     @Override
     public Page<DocBean> query(String key) {
-        return repository.findByContent(key,pageable);
+        return repository.findByContent(key, pageable);
+    }
+
+    @Override
+    public void deleteByDate(Date date) {
+        repository.deleteByDate(date);
     }
 }

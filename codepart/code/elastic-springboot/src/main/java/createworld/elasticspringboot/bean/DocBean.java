@@ -1,9 +1,12 @@
 package createworld.elasticspringboot.bean;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+
+import java.util.Date;
 
 /**
  * @author zhengzebiao
@@ -26,6 +29,9 @@ public class DocBean {
 
     @Field(type = FieldType.Integer)
     private Integer type;
+
+    @Field(type = FieldType.Date, format = DateFormat.basic_date)
+    private Date date;
 
     public DocBean() {
     }
