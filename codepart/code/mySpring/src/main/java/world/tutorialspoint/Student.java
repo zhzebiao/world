@@ -1,6 +1,7 @@
 package world.tutorialspoint;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
@@ -44,6 +45,7 @@ public class Student implements Serializable {
     }
 
     public void printThrowException(){
+        JdbcDaoSupport
         System.out.println("Exception raised");
         throw new IllegalArgumentException();
     }
