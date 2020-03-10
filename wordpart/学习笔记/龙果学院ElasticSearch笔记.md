@@ -1522,44 +1522,74 @@ vim /etc/security/limits.conf
 
 # 八、索引管理
 
-1. 压缩索引
+## 1. 压缩索引
 
-   因为shard涉及到document的hash路由问题，所以不允许增加primary shard数量的。如果要减少shard数量，压缩后的shard数量必须可以被原来的shard数量整除。
+因为shard涉及到document的hash路由问题，所以不允许增加primary shard数量的。如果要减少shard数量，压缩后的shard数量必须可以被原来的shard数量整除。
 
-   - shrink工作流程：
+- shrink工作流程：
 
-     1. 创建一个分片数量为指定数量、定义和source index相同的target index；
-     2. 将source index的segement file用hard-link的方式连接到target index的segment file上。如果操作系统不支持hard-link，那么将会采用copy的方式将segment file拷贝到target index的data dir中；
-     3. target index进行shard recovery恢复
+  1. 创建一个分片数量为指定数量、定义和source index相同的target index；
+  2. 将source index的segement file用hard-link的方式连接到target index的segment file上。如果操作系统不支持hard-link，那么将会采用copy的方式将segment file拷贝到target index的data dir中；
+  3. target index进行shard recovery恢复
 
-   - shrink的具体操作
+- shrink的具体操作
 
-     1. 将source index设为read only，并将所有的shard的一个副本移动到同个节点上；
+  1. 将source index设为read only，并将所有的shard的一个副本移动到同个节点上；
 
-        ```shell
-        curl -XPUT 'http://elasticsearch02:9200/twitter/_settings?pretty' -d '
-        {
-          "settings": {
-            "index.routing.allocation.require._name": "node-elasticsearch-02", 
-            "index.blocks.write": true 
-          }
-        }'
-        ```
+     ```shell
+     curl -XPUT 'http://elasticsearch02:9200/twitter/_settings?pretty' -d '
+     {
+       "settings": {
+         "index.routing.allocation.require._name": "node-elasticsearch-02", 
+         "index.blocks.write": true 
+       }
+     }'
+     ```
 
-        
+     
 
-     2. 执行shrink命令
+  2. 执行shrink命令
 
-        ```shell
-        curl -XPOST 'http://elasticsearch02:9200/twitter/_shrink/target_index?pretty' -d '
-        {
-          "settings": {
-            "index.number_of_replicas": 1,
-            "index.number_of_shards": 1, 
-            "index.codec": "best_compression" 
-          }
-        }'
-        ```
+     ```shell
+     curl -XPOST 'http://elasticsearch02:9200/twitter/_shrink/target_index?pretty' -d '
+     {
+       "settings": {
+         "index.number_of_replicas": 1,
+         "index.number_of_shards": 1, 
+         "index.codec": "best_compression" 
+       }
+     }'
+     ```
 
-   2. 
+## 2. 索引生命周期管理
 
+1. 索引内部的数据删除
+
+   #### 不变性
+
+   倒排索引被写入磁盘后是 *不可改变* 的:它永远不会修改。 不变性有重要的价值：
+
+   - 不需要锁。如果你从来不更新索引，你就不需要担心多进程同时修改数据的问题。
+   - 一旦索引被读入内核的文件系统缓存，便会留在哪里，由于其不变性。只要文件系统缓存中还有足够的空间，那么大部分读请求会直接请求内存，而不会命中磁盘。这提供了很大的性能提升。
+   - 其它缓存(像filter缓存)，在索引的生命周期内始终有效。它们不需要在每次数据改变时被重建，因为数据不会变化。
+   - 写入单个大的倒排索引允许数据被压缩，减少磁盘 I/O 和 需要被缓存到内存的索引的使用量。
+
+   当然，一个不变的索引也有不好的地方。主要事实是它是不可变的! 你不能修改它。如果你需要让一个新的文档可被搜索，你需要重建整个索引。这要么对一个索引所能包含的数据量造成了很大的限制，要么对索引可被更新的频率造成了很大的限制。
+
+   #### 动态更新索引
+
+   下一个需要被解决的问题是怎样在保留不变性的前提下实现倒排索引的更新？答案是: **用更多的索引。**
+
+   通过增加新的补充索引来反映新近的修改，而不是直接重写整个倒排索引。每一个倒排索引都会被轮流查询到—从最早的开始—查询完后再对结果进行合并。
+
+   ​	使用delete_by_query可以边查询边删除数据，但是实际相当于只打了个.del标签。在查询检索统计的时候还会参与检索，再在结果返回的时候过滤掉数据。如果要彻底删除已删除的过期数据，就要将段合并，待删除数据会在旧段合并成新段的时候彻底从磁盘中移除。
+
+   ```http
+POST /_forcemerge?only_expunge_deletes=true
+   ```
+   
+   
+
+2. 按周期生成的索引管理
+
+   使用Cutor

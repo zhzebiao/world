@@ -29,6 +29,13 @@ class ElasticSpringbootApplicationTests {
     }
 
     @Test
+    public void testSave() {
+        for (int i = 0; i < 3000; i++) {
+            service.save(new DocBean((long) i, "XX0193", "XX8064", "12 34", 1));
+        }
+    }
+
+    @Test
     public void testSaveAll() {
         List<DocBean> list = new ArrayList<>();
         list.add(new DocBean(7L, "XX0193", "XX8064", "12 34", 1));
@@ -44,24 +51,26 @@ class ElasticSpringbootApplicationTests {
             System.out.println("Record :" + iterator.next());
         }
     }
+
     @Test
-    public void testDelete(){
+    public void testDelete() {
         service.deleteIndex("test");
     }
 
     @Test
-    public void testFindByFirstCode(){
-        Page<DocBean> page =  service.findByFirstCode("XX0193");
+    public void testFindByFirstCode() {
+        Page<DocBean> page = service.findByFirstCode("XX0193");
         Iterator<DocBean> items = page.iterator();
-        while(items.hasNext()){
+        while (items.hasNext()) {
             System.out.println(items.next());
         }
     }
+
     @Test
-    public void testFindByContent(){
-        Page<DocBean> page =  service.findByContent("12");
+    public void testFindByContent() {
+        Page<DocBean> page = service.findByContent("12");
         Iterator<DocBean> items = page.iterator();
-        while(items.hasNext()){
+        while (items.hasNext()) {
             System.out.println(items.next());
         }
     }
