@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 /**
+ * 构建高效且可伸缩的结果缓存
+ *
  * @author zhengzebiao
  * @date 2020/1/2 16:10
  */
