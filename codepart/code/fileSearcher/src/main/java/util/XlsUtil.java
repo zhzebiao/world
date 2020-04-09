@@ -3,12 +3,14 @@ package util;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -53,40 +55,38 @@ public class XlsUtil {
                 row0.createCell(excelIndex).setCellValue("Excel路径");
 
                 for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+
+                    boolean isInvalidRow = false;
                     StringJoiner pdfPaths = new StringJoiner(",");
                     StringJoiner pdxPaths = new StringJoiner(",");
                     StringJoiner xlsPaths = new StringJoiner(",");
                     Row currentRow = sheet.getRow(i);
-
-                    List<String> list = reportsMatchMonthsMap.get(currentRow.getCell(idIndex).getStringCellValue().trim().toLowerCase());
-                    if (list != null) {
-                        for (String path : list) {
-                            String lowerCasePath = path.toLowerCase();
-                            if (lowerCasePath.endsWith("pdf")) {
-                                pdfPaths.add(path);
-                            } else if (lowerCasePath.endsWith("pdx")) {
-                                pdxPaths.add(path);
-                            } else if (lowerCasePath.endsWith("xls") || lowerCasePath.endsWith("xlsx")) {
-                                xlsPaths.add(path);
+                    List<Cell> cellsForMatch = new ArrayList<>();
+                    cellsForMatch.add(currentRow.getCell(idIndex));
+                    cellsForMatch.add(currentRow.getCell(nameIndex));
+                    for (Cell currentCell : cellsForMatch) {
+                        if (currentCell != null) {
+                            isInvalidRow = true;
+                            List<String> list = reportsMatchMonthsMap.get(currentCell.getStringCellValue().trim().toLowerCase());
+                            if (list != null) {
+                                for (String path : list) {
+                                    String lowerCasePath = path.toLowerCase();
+                                    if (lowerCasePath.endsWith("pdf")) {
+                                        pdfPaths.add(path);
+                                    } else if (lowerCasePath.endsWith("pdx")) {
+                                        pdxPaths.add(path);
+                                    } else if (lowerCasePath.endsWith("xls") || lowerCasePath.endsWith("xlsx")) {
+                                        xlsPaths.add(path);
+                                    }
+                                }
                             }
                         }
                     }
-                    list = reportsMatchMonthsMap.get(currentRow.getCell(nameIndex).getStringCellValue().trim().toLowerCase());
-                    if (list != null) {
-                        for (String path : list) {
-                            String lowerCasePath = path.toLowerCase();
-                            if (lowerCasePath.endsWith("pdf")) {
-                                pdfPaths.add(path);
-                            } else if (lowerCasePath.endsWith("pdx")) {
-                                pdxPaths.add(path);
-                            } else if (lowerCasePath.endsWith("xls") || lowerCasePath.endsWith("xlsx")) {
-                                xlsPaths.add(path);
-                            }
-                        }
+                    if (isInvalidRow) {
+                        currentRow.createCell(pdfIndex).setCellValue(pdfPaths.length() > 0 ? pdfPaths.toString() : "缺失");
+                        currentRow.createCell(pdxIndex).setCellValue(pdxPaths.length() > 0 ? pdxPaths.toString() : "缺失");
+                        currentRow.createCell(excelIndex).setCellValue(xlsPaths.length() > 0 ? xlsPaths.toString() : "缺失");
                     }
-                    currentRow.createCell(pdfIndex).setCellValue(pdfPaths.length() > 0 ? pdfPaths.toString() : "缺失");
-                    currentRow.createCell(pdxIndex).setCellValue(pdxPaths.length() > 0 ? pdxPaths.toString() : "缺失");
-                    currentRow.createCell(excelIndex).setCellValue(xlsPaths.length() > 0 ? xlsPaths.toString() : "缺失");
                 }
             }
             out = new FileOutputStream(file);
