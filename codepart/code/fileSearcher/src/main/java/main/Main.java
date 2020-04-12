@@ -132,6 +132,7 @@ public class Main {
                 } else {
                     String fileName = file.getName();
                     if (fileName.matches("[\\w|\\d]+-\\d{8}[\\w\\W]+")) {
+                        // TODO:
                         String id = fileName.split("-")[0].toLowerCase();
                         String date = fileName.split("-")[1].substring(0, 6);
                         if (monthSet.contains(date)) {
