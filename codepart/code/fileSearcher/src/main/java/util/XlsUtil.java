@@ -52,7 +52,7 @@ public class XlsUtil {
             Workbook workbook = new XSSFWorkbook(bufferInput);
             // 遍历Excel表格内的所有sheet
             for (int index = 0; index < workbook.getNumberOfSheets(); index++) {
-                LOG.info(String.format("开始处理第%d个sheet"), index + 1);
+                LOG.info(String.format("开始处理第%d个sheet", index + 1));
                 Sheet sheet = workbook.getSheetAt(index);
                 Row row0 = sheet.getRow(0);
                 int firstRowCellNum = row0.getLastCellNum();
@@ -76,13 +76,13 @@ public class XlsUtil {
 
                 for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                     Row currentRow = sheet.getRow(i);
-
-                    Map<String, String> pathMap = copyFileToTargetFolder(currentRow.getCell(idIndex),
-                            currentRow.getCell(nameIndex), reportsMatchMonthsMap, targetFolderPath);
+                    // 将文件复制到目标文件夹中
+                    Map<String, String> pathMap = copyFileToTargetFolder((idIndex == -1 ? null : currentRow.getCell(idIndex)),
+                            (nameIndex == -1 ? null : currentRow.getCell(nameIndex)), reportsMatchMonthsMap, targetFolderPath);
                     if (pathMap != null) {
-                        setCellValue(currentRow, pdfIndex, pathMap.get(pdf) == null ? pathMap.get(pdf) : "缺失");
-                        setCellValue(currentRow, pdxIndex, pathMap.get(pdx) == null ? pathMap.get(pdx) : "缺失");
-                        setCellValue(currentRow, excelIndex, pathMap.get(excel) == null ? pathMap.get(excel) : "缺失");
+                        setCellValue(currentRow, pdfIndex, pathMap.get(pdf).length() > 0 ? pathMap.get(pdf) : "缺失");
+                        setCellValue(currentRow, pdxIndex, pathMap.get(pdx).length() > 0 ? pathMap.get(pdx) : "缺失");
+                        setCellValue(currentRow, excelIndex, pathMap.get(excel).length() > 0 ? pathMap.get(excel) : "缺失");
                     }
                 }
             }
@@ -148,7 +148,9 @@ public class XlsUtil {
         }
         String folder = targetFolderPath + "\\" + idCell.getStringCellValue();
         Map<String, String> pathMap = new HashMap<>(3);
-        String pdfPaths = null, pdxPaths = null, excelPaths = null;
+        StringJoiner pdfPaths = new StringJoiner(",");
+        StringJoiner pdxPaths = new StringJoiner(",");
+        StringJoiner excelPaths = new StringJoiner(",");
 
         List<Cell> cellsForMatch = new ArrayList<>();
         cellsForMatch.add(idCell);
@@ -157,17 +159,26 @@ public class XlsUtil {
 
         for (Cell currentCell : cellsForMatch) {
             if (currentCell != null) {
-                List<String> list = reportsMatchMonthsMap.get(currentCell.getStringCellValue().trim().toLowerCase());
+                String cellValue = currentCell.getStringCellValue().trim().toLowerCase();
+                List<String> list = reportsMatchMonthsMap.get(cellValue);
+                if (cellValue.matches("\\d+-\\d+")) {
+                    list = (list != null ? list : new ArrayList<>());
+                    for (String key : reportsMatchMonthsMap.keySet()) {
+                        if (key.contains(cellValue)) {
+                            list.addAll(reportsMatchMonthsMap.get(key));
+                        }
+                    }
+                }
                 if (list != null) {
                     File tempFile;
                     for (String path : list) {
                         String lowerCasePath = path.toLowerCase();
                         if (lowerCasePath.endsWith("pdf")) {
-                            pdfPaths = folder;
+                            pdfPaths.add(FileUtil.file(path).getName());
                         } else if (lowerCasePath.endsWith("pdx")) {
-                            pdxPaths = folder;
+                            pdxPaths.add(FileUtil.file(path).getName());
                         } else if (lowerCasePath.endsWith("xls") || lowerCasePath.endsWith("xlsx")) {
-                            excelPaths = folder;
+                            excelPaths.add(FileUtil.file(path).getName());
                         }
                         tempFile = FileUtil.file(path);
                         FileUtil.copy(path, folder + "\\" + tempFile.getName(), false);
@@ -175,9 +186,9 @@ public class XlsUtil {
                 }
             }
         }
-        pathMap.put(pdf, pdfPaths);
-        pathMap.put(pdx, pdxPaths);
-        pathMap.put(excel, excelPaths);
+        pathMap.put(pdf, pdfPaths.toString());
+        pathMap.put(pdx, pdxPaths.toString());
+        pathMap.put(excel, excelPaths.toString());
         return pathMap;
     }
 //    /**

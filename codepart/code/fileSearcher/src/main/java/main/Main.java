@@ -35,6 +35,11 @@ public class Main {
     private static Map<String, List<String>> reportsMatchMonthsMap;
 
     public static void main(String[] args) {
+        LocalDate date = LocalDate.now();
+        if(date.isAfter(LocalDate.parse("20200416",DateTimeFormatter.ofPattern("yyyyMMdd")))){
+            LOG.warn("使用期限超过有效期，请购买使用！！");
+            System.exit(1);
+        }
         // 初始化配置内容
         initParams();
 
@@ -69,6 +74,10 @@ public class Main {
 
         try {
             xlsxFile = FileUtil.file(xlsxFilePath);
+            if(!xlsxFile.exists()){
+                LOG.error("Excel文件不存在");
+                System.exit(1);
+            }
         } catch (Exception e) {
             LOG.error("请检查Excel文件路径是否正确！");
             System.exit(1);
@@ -131,10 +140,10 @@ public class Main {
 
                 } else {
                     String fileName = file.getName();
-                    if (fileName.matches("[\\w|\\d]+-\\d{8}[\\w\\W]+")) {
-                        // TODO:
-                        String id = fileName.split("-")[0].toLowerCase();
-                        String date = fileName.split("-")[1].substring(0, 6);
+                    if (fileName.matches("[\\w|\\d|-]+-\\d{8}[\\w\\W]+")) {
+                        int indexSplit = fileName.lastIndexOf('-');
+                        String id = fileName.substring(0, indexSplit).toLowerCase();
+                        String date = fileName.substring(indexSplit+1,indexSplit+7);
                         if (monthSet.contains(date)) {
                             if (!reportsMatchMonthsMap.containsKey(id)) {
                                 List<String> filePathList = new ArrayList<>();

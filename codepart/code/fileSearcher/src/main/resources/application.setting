@@ -1,8 +1,8 @@
 
 // 待查询xlsx文件
-xlsxFilePath=E:\2连平-20200326-黄佩瑜修16连平中心·金康速力入组登记表(1)(1).xlsx
+xlsxFilePath=E:\1-20200326黄佩瑜修课题三入组情况登记表.xlsx
 // 所有报告汇总文件夹
-reportsPath=E:\下载
+reportsPath=E:\BaiduNetdiskDownload\代码文件
 // 查询日期
-searchMonths=201907
+searchMonths=201909
 
