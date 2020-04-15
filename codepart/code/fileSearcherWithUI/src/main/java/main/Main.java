@@ -61,6 +61,7 @@ public final class Main extends Application {
                     File file = fileChooser.showOpenDialog(stage);
                     if (file != null) {
                         excelPath.setText(file.getAbsolutePath());
+                        logTextArea.appendText("已选择Excel文件: " + file.getAbsolutePath() + "\n");
                         searchService.setXlsxFile(file);
                     }
                 }
@@ -98,7 +99,9 @@ public final class Main extends Application {
 
 
         final Pane logPane = new Pane();
+
         logPane.getChildren().addAll(logTextArea);
+        logTextArea.setPrefWidth(710);
 
         final Pane rootGroup = new VBox(12);
         rootGroup.getChildren().addAll(inputGridPane, logPane);
