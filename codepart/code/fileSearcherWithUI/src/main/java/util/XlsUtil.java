@@ -167,7 +167,7 @@ public class XlsUtil {
             if (currentCell != null) {
                 String cellValue = currentCell.getStringCellValue().trim().toLowerCase();
                 List<String> list = reportsMatchMonthsMap.get(cellValue);
-                if (cellValue. ( "\\d+-\\d+")) {
+                if (cellValue.matches("\\d+-\\d+")) {
                     list = (list != null ? list : new ArrayList<>());
                     for (String key : reportsMatchMonthsMap.keySet()) {
                         if (key.contains(cellValue)) {
