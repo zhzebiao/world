@@ -3,6 +3,7 @@ package util;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
+import cn.hutool.poi.excel.WorkbookUtil;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -18,7 +19,7 @@ import java.util.*;
  */
 public class XlsUtil {
 
-    private static Log LOG = LogFactory.get();
+    private static final Log LOG = LogFactory.get();
 
     private static final String id = "ID号";
 
@@ -33,14 +34,15 @@ public class XlsUtil {
 
     public static void writeToXlsx(File srcfile, Map<String, List<String>> reportsMatchMonthsMap) {
 
-//        LOG.info("开始补充Excel档案数据...");
-//        // 先备份文件
-//        File backupFile = backupXlsx(file);
 
+        LogUtil.info("创建结果文件夹");
         LOG.info("创建结果文件夹");
+
         String targetFolderPath = srcfile.getParent() + "\\FileSearcher运行结果";
+        FileUtil.del(targetFolderPath);
         FileUtil.mkdir(targetFolderPath);
 
+        LogUtil.info("复制结果Excel文件到结果文件夹中");
         LOG.info("复制结果Excel文件到结果文件夹中");
         File targetExcelFile = FileUtil.touch(targetFolderPath, srcfile.getName());
         FileUtil.copy(srcfile, targetExcelFile, true);
@@ -50,8 +52,10 @@ public class XlsUtil {
         try {
             BufferedInputStream bufferInput = new BufferedInputStream(new FileInputStream(targetExcelFile));
             Workbook workbook = new XSSFWorkbook(bufferInput);
+
             // 遍历Excel表格内的所有sheet
             for (int index = 0; index < workbook.getNumberOfSheets(); index++) {
+                LogUtil.info(String.format("开始处理第%d个sheet", index + 1));
                 LOG.info(String.format("开始处理第%d个sheet", index + 1));
                 Sheet sheet = workbook.getSheetAt(index);
                 Row row0 = sheet.getRow(0);
@@ -88,9 +92,11 @@ public class XlsUtil {
             }
             out = new FileOutputStream(targetExcelFile);
             workbook.write(out);
+            LogUtil.info("Excel档案数据生成结束！");
             LOG.info("Excel档案数据生成结束！");
         } catch (IOException e) {
-            LOG.error("Excel文件生成时发生错误", e);
+            LogUtil.error("Excel文件生成时发生错误" + e.toString());
+            LOG.error("Excel文件生成时发生错误" + e.toString());
         }
 
     }
@@ -161,7 +167,7 @@ public class XlsUtil {
             if (currentCell != null) {
                 String cellValue = currentCell.getStringCellValue().trim().toLowerCase();
                 List<String> list = reportsMatchMonthsMap.get(cellValue);
-                if (cellValue.matches("\\d+-\\d+")) {
+                if (cellValue. ( "\\d+-\\d+")) {
                     list = (list != null ? list : new ArrayList<>());
                     for (String key : reportsMatchMonthsMap.keySet()) {
                         if (key.contains(cellValue)) {

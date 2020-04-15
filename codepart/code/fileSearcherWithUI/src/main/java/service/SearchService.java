@@ -2,6 +2,8 @@ package service;
 
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
+import util.LogUtil;
+import util.XlsUtil;
 
 import java.io.File;
 import java.time.LocalDate;
@@ -14,7 +16,7 @@ import java.util.*;
  */
 public class SearchService {
 
-    private static Log LOG = LogFactory.get();
+    private Log LOG = LogFactory.get();
 
     // 查询时间范围
     private Set<String> monthSet = new HashSet<>();
@@ -50,23 +52,39 @@ public class SearchService {
     }
 
     public void execute() {
+        if (LocalDate.now().isAfter(LocalDate.parse("20200419", DateTimeFormatter.ofPattern("yyyyMMdd")))) {
+            String message = "使用期限超过有效期，请购买使用！！";
+            LogUtil.warn(message);
+            LOG.warn(message);
+        }
 
+        new Thread(
+                () -> {
+                    if (checkParam()) {
+                        solveSearchMonths(startMonth, endMonth);
+                        reportsMatchMonthsMap = solveReportsFolder(reportsFloder);
+                        XlsUtil.writeToXlsx(xlsxFile, reportsMatchMonthsMap);
+                    } else {
+                        String message = "参数检测异常，请重新填写参数！";
+                        LogUtil.warn(message);
+                        LOG.warn(message);
+                    }
+                }
+        ).start();
 
-        solveSearchMonths(startMonth, endMonth);
-
-        reportsMatchMonthsMap = solveReportsFolder(reportsFloder);
-
-//        XlsUtil.writeToXlsx(xlsxFile, reportsMatchMonthsMap);
     }
 
     /**
      * 将查询时间解析成查询时间集合
      *
      * @param startMonthString 查询开始月份
-     * @param  endMonthString 查询结束月份
+     * @param endMonthString   查询结束月份
      */
     private void solveSearchMonths(String startMonthString, String endMonthString) {
-        LOG.info("开始解析搜索时间条件...");
+        String message = "开始解析搜索时间条件...";
+        LogUtil.info(message);
+        LOG.info(message);
+
 
         try {
             LocalDate startMonth = LocalDate.parse(startMonthString + "01", DateTimeFormatter.ofPattern("yyyyMMdd"));
@@ -80,13 +98,23 @@ public class SearchService {
                 }
             }
         } catch (Exception e) {
-            LOG.error("时间解析出错，请检查时间格式", e);
+            message = "时间解析出错，请检查时间格式。" + e.toString();
+            LogUtil.error(message);
+            LOG.error(message);
+
         }
         StringJoiner sj = new StringJoiner(",");
         for (String month : monthSet) {
             sj.add(month);
         }
-        LOG.info("查询月份有:" + sj.toString());
+        message = "查询月份有:" + sj.toString();
+        LogUtil.info(message);
+        LOG.info(message);
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+
+        }
     }
 
     /**
@@ -96,7 +124,10 @@ public class SearchService {
      * @return 满足条件的文件目录
      */
     private Map<String, List<String>> solveReportsFolder(File reportFolder) {
-        LOG.info("开始进行文件搜索,请耐心等待...");
+        String message = "开始进行文件搜索,请耐心等待...";
+        LogUtil.info(message);
+        LOG.info(message);
+
         Map<String, List<String>> reportsMatchMonthsMap = new HashMap<>();
         Stack<File> files = new Stack<>();
         files.push(reportFolder);
@@ -123,8 +154,62 @@ public class SearchService {
                 }
             }
         }
-        LOG.info("文件搜索完成！");
+        message = "文件搜索完成！";
+        LogUtil.info(message);
+        LOG.info(message);
         return reportsMatchMonthsMap;
+    }
+
+    /**
+     * 运行参数检测
+     *
+     * @return
+     */
+    private boolean checkParam() {
+        String message;
+        if (!xlsxFile.exists()) {
+            message = "文件不存在: " + xlsxFile.getAbsolutePath();
+            LogUtil.error(message);
+            LOG.error(message);
+            return false;
+        }
+        if (!xlsxFile.getName().endsWith("xlsx") && !xlsxFile.getName().endsWith("xls")) {
+            message = "所选文件不是Excel文件: " + xlsxFile.getAbsolutePath();
+            LogUtil.error(message);
+            LOG.error(message);
+            return false;
+        }
+        if (!reportsFloder.exists()) {
+            message = "文件夹不存在: " + reportsFloder.getAbsolutePath();
+            LogUtil.error(message);
+            LOG.error(message);
+            return false;
+        }
+        if (!reportsFloder.isDirectory()) {
+            message = "请选择正确的文件夹路径: " + reportsFloder.getAbsolutePath();
+            LogUtil.error(message);
+            LOG.error(message);
+            return false;
+        }
+        if (startMonth == null || !startMonth.matches("\\d{6}")) {
+            message = "查询开始时间格式错误，正确格式应为: yyyyMM，例如:202004";
+            LogUtil.error(message);
+            LOG.error(message);
+            return false;
+        }
+        if (endMonth == null || !endMonth.matches("\\d{6}")) {
+            message = "查询结束时间格式错误，正确格式应为: yyyyMM，例如:202004";
+            LogUtil.error(message);
+            LOG.error(message);
+            return false;
+        }
+        if (startMonth.compareTo(endMonth) > 0) {
+            message = "查询开始时间应该比查询结束时间小";
+            LogUtil.error(message);
+            LOG.error(message);
+            return false;
+        }
+        return true;
     }
 
 }

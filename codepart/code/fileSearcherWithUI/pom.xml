@@ -57,7 +57,6 @@
                 </configuration>
             </plugin>
 
-            <!-- 通过Assembly打包项目, 把项目的依赖以及配置文件外置, 做到可外部配置 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>

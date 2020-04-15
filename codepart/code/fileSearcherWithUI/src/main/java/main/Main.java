@@ -3,12 +3,9 @@ package main;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
 import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
@@ -17,27 +14,23 @@ import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.util.StringConverter;
 import service.SearchService;
+import util.LogUtil;
 
-import java.awt.*;
-import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.IOException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 
 public final class Main extends Application {
 
+
     private static final Log LOG = LogFactory.get();
-    private final Desktop desktop = Desktop.getDesktop();
 
     private SearchService searchService = new SearchService();
 
+
     @Override
     public void start(final Stage stage) {
-        stage.setTitle("File Chooser Sample");
+        stage.setTitle("File Searcher");
 
         final FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(
@@ -54,6 +47,8 @@ public final class Main extends Application {
 
         final TextArea logTextArea = new TextArea();
 
+        LogUtil.setLogTextArea(logTextArea);
+
         excelPath.setEditable(false);
         excelPath.setPromptText("选择Excel文件...");
         excelPath.setOnMouseClicked(
@@ -61,7 +56,8 @@ public final class Main extends Application {
                     File file = fileChooser.showOpenDialog(stage);
                     if (file != null) {
                         excelPath.setText(file.getAbsolutePath());
-                        logTextArea.appendText("已选择Excel文件: " + file.getAbsolutePath() + "\n");
+                        LogUtil.info("已选择Excel文件: " + file.getAbsolutePath());
+                        LOG.info("已选择Excel文件: " + file.getAbsolutePath());
                         searchService.setXlsxFile(file);
                     }
                 }
@@ -73,6 +69,8 @@ public final class Main extends Application {
                     File file = directoryChooser.showDialog(stage);
                     if (file != null) {
                         folderPath.setText(file.getAbsolutePath());
+                        LogUtil.info("已选择文件夹：" + file.getAbsolutePath());
+                        LOG.info("已选择文件夹：" + file.getAbsolutePath());
                         searchService.setReportsFloder(file);
                     }
                 }
@@ -86,6 +84,7 @@ public final class Main extends Application {
                     searchService.execute();
                 }
         );
+
 
         final GridPane inputGridPane = new GridPane();
         GridPane.setConstraints(excelPath, 0, 0);
@@ -110,6 +109,7 @@ public final class Main extends Application {
         stage.setScene(new Scene(rootGroup));
         stage.setResizable(false);
         stage.show();
+        searchButton.requestFocus();
     }
 
     public static void main(String[] args) {
