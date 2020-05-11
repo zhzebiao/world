@@ -52,11 +52,11 @@ public class SearchService {
     }
 
     public void execute() {
-        if (LocalDate.now().isAfter(LocalDate.parse("20200419", DateTimeFormatter.ofPattern("yyyyMMdd")))) {
-            String message = "使用期限超过有效期，请购买使用！！";
-            LogUtil.warn(message);
-            LOG.warn(message);
-        }
+//        if (LocalDate.now().isAfter(LocalDate.parse("20200519", DateTimeFormatter.ofPattern("yyyyMMdd")))) {
+//            String message = "使用期限超过有效期，请购买使用！！";
+//            LogUtil.warn(message);
+//            LOG.warn(message);
+//        }
 
         new Thread(
                 () -> {
