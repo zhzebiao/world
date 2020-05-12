@@ -4,10 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
 import cn.hutool.poi.excel.WorkbookUtil;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.*;
@@ -58,7 +55,12 @@ public class XlsUtil {
                 LogUtil.info(String.format("开始处理第%d个sheet", index + 1));
                 LOG.info(String.format("开始处理第%d个sheet", index + 1));
                 Sheet sheet = workbook.getSheetAt(index);
+
                 Row row0 = sheet.getRow(0);
+                // 判断是否是空白sheet，如果是，则跳过不处理
+                if(row0 == null){
+                    continue;
+                }
                 int firstRowCellNum = row0.getLastCellNum();
 
                 // 预生成之后需要使用到的cell坐标
@@ -152,11 +154,24 @@ public class XlsUtil {
         if (idCell == null) {
             return null;
         }
-        String folder = targetFolderPath + "\\" + idCell.getStringCellValue();
+        String subFolderName = null;
+        CellType type1 = idCell.getCellTypeEnum();
+        switch (type1) {
+            case STRING:
+                subFolderName = idCell.getStringCellValue().trim();
+                break;
+            case NUMERIC:
+                subFolderName = (idCell.getNumericCellValue() + "");
+        }
+        if (subFolderName == null) return null;
+        String folder = targetFolderPath + "\\" + subFolderName;
         Map<String, String> pathMap = new HashMap<>(3);
         StringJoiner pdfPaths = new StringJoiner(",");
         StringJoiner pdxPaths = new StringJoiner(",");
         StringJoiner excelPaths = new StringJoiner(",");
+        Set pdfSet = new HashSet();
+        Set pdxSet = new HashSet();
+        Set excelSet = new HashSet();
 
         List<Cell> cellsForMatch = new ArrayList<>();
         cellsForMatch.add(idCell);
@@ -165,9 +180,20 @@ public class XlsUtil {
 
         for (Cell currentCell : cellsForMatch) {
             if (currentCell != null) {
-                String cellValue = currentCell.getStringCellValue().trim().toLowerCase();
+                String cellValue = null;
+                CellType type = currentCell.getCellTypeEnum();
+                switch (type) {
+                    case STRING:
+                        cellValue = currentCell.getStringCellValue().trim().toLowerCase();
+                        break;
+                    case NUMERIC:
+                        cellValue = (currentCell.getNumericCellValue() + "");
+                }
+                if (cellValue == null) continue;
+
                 List<String> list = reportsMatchMonthsMap.get(cellValue);
-                if (cellValue.matches("\\d+-\\d+")) {
+                // 对特殊ID号进行处理
+                if (cellValue.matches("\\d+-*\\d+")) {
                     list = (list != null ? list : new ArrayList<>());
                     for (String key : reportsMatchMonthsMap.keySet()) {
                         if (key.contains(cellValue)) {
@@ -178,13 +204,22 @@ public class XlsUtil {
                 if (list != null) {
                     File tempFile;
                     for (String path : list) {
-                        String lowerCasePath = path.toLowerCase();
-                        if (lowerCasePath.endsWith("pdf")) {
-                            pdfPaths.add(FileUtil.file(path).getName());
-                        } else if (lowerCasePath.endsWith("pdx")) {
-                            pdxPaths.add(FileUtil.file(path).getName());
-                        } else if (lowerCasePath.endsWith("xls") || lowerCasePath.endsWith("xlsx")) {
-                            excelPaths.add(FileUtil.file(path).getName());
+                        String lowerCaseFileName = FileUtil.file(path).getName().toLowerCase();
+                        if (lowerCaseFileName.endsWith("pdf")) {
+                            if (!pdfSet.contains(lowerCaseFileName)) {
+                                pdfPaths.add(lowerCaseFileName);
+                                pdfSet.add(lowerCaseFileName);
+                            }
+                        } else if (lowerCaseFileName.endsWith("pdx")) {
+                            if (!pdxSet.contains(lowerCaseFileName)) {
+                                pdxPaths.add(lowerCaseFileName);
+                                pdxSet.add(lowerCaseFileName);
+                            }
+                        } else if (lowerCaseFileName.endsWith("xls") || lowerCaseFileName.endsWith("xlsx")) {
+                            if (!excelSet.contains(lowerCaseFileName)) {
+                                excelPaths.add(lowerCaseFileName);
+                                excelSet.add(lowerCaseFileName);
+                            }
                         }
                         tempFile = FileUtil.file(path);
                         FileUtil.copy(path, folder + "\\" + tempFile.getName(), false);
