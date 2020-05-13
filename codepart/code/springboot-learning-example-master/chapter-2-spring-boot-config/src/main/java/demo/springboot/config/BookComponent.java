@@ -19,7 +19,7 @@ public class BookComponent {
     /**
      * 书名
      */
-    @NotEmpty
+    @NotEmpty(message = "name字段不能为空")
     private String name;
 
     /**

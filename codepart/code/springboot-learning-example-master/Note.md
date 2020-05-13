@@ -164,12 +164,16 @@
     cluster.datasource.driverClassName=com.mysql.jdbc.Driver
     ```
   
-    ```
+    
+    
+    ```markdown
     # 不同数据源的mapper文件分包存放
     master数据源的mapper文件存放位置：resources/mapper/master/*
-    cluster数据源的mapper文件存放位置：resources/mapper/cluster/*
+  cluster数据源的mapper文件存放位置：resources/mapper/cluster/*
     ```
-  
+    
+    
+    
     ```java
     # 添加不同数据源的配置类，下面以cluster数据源为例进行配置类的讲解
     @Configuration
@@ -216,14 +220,14 @@
             sessionFactory.setDataSource(clusterDataSource);
             sessionFactory.setMapperLocations(new PathMatchingResourcePatternResolver()
                     .getResources(ClusterDataSourceConfig.MAPPER_LOCATION));
-            return sessionFactory.getObject();
+          return sessionFactory.getObject();
         }
     }
     ```
-  
+    
     
   
-- [ ] <!-- Spring Boot 整合 Redis 实现缓存 -->
+- [x] <!-- Spring Boot 整合 Redis 实现缓存 -->
 
   - springboot-mybatis-redis
 
@@ -242,19 +246,149 @@
 
 - [ ] <!-- Spring Boot 注解实现整合 Redis 实现缓存 -->
 
-- springboot-mybatis-redis-annotation
+  - springboot-mybatis-redis-annotation
 
-- [ ] <!-- Spring Boot 实现 Restful 服务，基于 HTTP / JSON 传输 -->
+    @Cacheable：检查value是否存在，不存在则新增，存在则不操作；
 
-- springboot-restful
+    @CachePut：直接替换value所缓存的值；
 
-- [ ] <!-- Spring Boot 之配置文件详解 -->
+    @CacheEvict：清除value所缓存的值；
 
-- springboot-properties
+    ```java
+    @Service
+    public class EmployeeService {
+    
+        @Autowired
+        EmployeeMapper employeeMapper;
+        /**
+         *  @Cacheable
+         * 将方法的运行结果进行缓存，如果需要相同的数据，就可以直接从缓存中获取
+         * 不用调用方法
+         *
+         * CacheManager管理多个Cache组件，对缓存真正的CRUD操作在Cache组件中，每一个缓存组件
+         * 有自己唯一一个名字
+         * value/cacheNames:指定缓存组件的名字
+         * key ;缓存数据时使用的key；可以用他来指定，默认使用方法参数的值  1-方法返回值
+         *       编写SPEL表达式 #id：参数id的值， #a0,#p0,#root.args[0]
+         * keyGenerator key的生成器，可以自己指定key的生成器的组件ID
+         *      key/keyGenerator 二选一
+         *
+         * cacheManager 指定缓存管理器，或者指定缓存解析器cacheResolver
+         *
+         * condition 指定复合条件的情况下才缓存
+         *
+         * unless 否定缓存，当unless指定的条件为true，方法的返回值就不会缓存，可以获取到结果进行判断
+         *
+         * sync 是否使用异步模式
+         * @param id
+         * @return
+         */
+        @Cacheable(cacheNames = {"emp"})
+        public Employee getEmp(Integer id){
+            System.out.println("查询"+id+"号员工");
+            return employeeMapper.getEmpById(id);
+        }
+    }
+    ```
+
+    
+
+- [x] <!-- Spring Boot 实现 Restful 服务，基于 HTTP / JSON 传输 -->
+
+  -  springboot-restful
+
+- [x] <!-- Spring Boot 之配置文件详解 -->
+
+  -  springboot-properties
+
+    ```markdown
+    # 指定当前可用的配置文件
+    spring.profiles.active=dev
+    ```
+
+    
 
 - [ ] <!-- Spring Boot HTTP over JSON 的错误码异常处理 -->
 
-- springboot-validation-over-json
+  - springboot-validation-over-json
+
+    ```java
+    public interface ErrorInfoInterface {
+        String getCode();
+        String getMessage();
+    }
+    # Error Code Enum
+    public enum GlobalErrorInfoEnum implements ErrorInfoInterface{
+        SUCCESS("0", "success"),
+        NOT_FOUND("-1", "service not found");
+    
+        private String code;
+    
+        private String message;
+    
+        GlobalErrorInfoEnum(String code, String message) {
+            this.code = code;
+            this.message = message;
+        }
+        // getter() & setter()
+    }
+    
+    # Exception
+    public class GlobalErrorInfoException extends Exception {
+    
+        private ErrorInfoInterface errorInfo;
+    
+        public GlobalErrorInfoException (ErrorInfoInterface errorInfo) {
+            this.errorInfo = errorInfo;
+        }
+        // getter() & setter()
+    }
+    
+    #Error/Exception Handler
+    @RestControllerAdvice  //使用切面技术
+    public class GlobalErrorInfoHandler {
+    
+        @ExceptionHandler(value = GlobalErrorInfoException.class)
+        public ResultBody errorHandlerOverJson(HttpServletRequest request,
+                                               GlobalErrorInfoException exception) {
+            ErrorInfoInterface errorInfo = exception.getErrorInfo();
+            ResultBody result = new ResultBody(errorInfo);
+            return result;
+        }
+    }
+    
+    public class ResultBody {
+        /**
+         * 响应代码
+         */
+        private String code;
+    
+        /**
+         * 响应消息
+         */
+        private String message;
+    
+        /**
+         * 响应结果
+         */
+        private Object result;
+    
+        public ResultBody(ErrorInfoInterface errorInfo) {
+            this.code = errorInfo.getCode();
+            this.message = errorInfo.getMessage();
+        }
+    
+        public ResultBody(Object result) {
+            this.code = GlobalErrorInfoEnum.SUCCESS.getCode();
+            this.message = GlobalErrorInfoEnum.SUCCESS.getMessage();
+            this.result = result;
+        }
+    	// getter() && setter()
+    }
+    
+    ```
+
+    
 
 - [ ] <!-- Spring Boot 2.0 WebFlux -->
 
