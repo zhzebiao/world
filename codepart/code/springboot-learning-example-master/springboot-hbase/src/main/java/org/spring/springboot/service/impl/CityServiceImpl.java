@@ -24,6 +24,7 @@ public class CityServiceImpl implements CityService {
     
     @Autowired private HbaseTemplate hbaseTemplate;
     
+    @Override
     public List<City> query(String startRow, String stopRow) {
         Scan scan = new Scan(Bytes.toBytes(startRow), Bytes.toBytes(stopRow));
         scan.setCaching(5000);
@@ -31,11 +32,13 @@ public class CityServiceImpl implements CityService {
         return dtos;
     }
     
+    @Override
     public City query(String row) {
         City dto = this.hbaseTemplate.get("people_table", row, new CityRowMapper());
         return dto;
     }
     
+    @Override
     public void saveOrUpdate() {
         List<Mutation> saveOrUpdates = new ArrayList<Mutation>();
         Put            put           = new Put(Bytes.toBytes("135xxxxxx"));
