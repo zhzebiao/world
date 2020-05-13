@@ -5,6 +5,7 @@
     @RestController = @Controller+@ResponseBody
 
     @RequestMapping(value={{path}},method=RequestMethod.GET)
+  
 - [x] <!-- 第 2 章《配置》 -->
 
   - chapter-2-spring-boot-config
@@ -12,6 +13,7 @@
     @EnableSwagger2Doc ： 在Application上打开Swagger Api文档自动生成功能；
 
     @Value("${demo.book.name}") ：可以用application.properties或者application.yml中的值注入到变量中；
+  
 - [x] <!-- 第 3 章《Web 开发》 -->
 
   - chapter-3-spring-boot-web
@@ -25,18 +27,22 @@
     @ModelAttribute：读取x-www-form-urlencoded后的键值对，解析成对象
     
     @RequestParam：读取x-www-form-urlencoded后的键值对
+  
 - [x] <!-- 第 4 章《模板引擎》 -->
 
   - chapter-4-spring-boot-web-thymeleaf
+  
 - [x] <!-- 第 4 章表单校验案例 -->
   - chapter-4-spring-boot-validating-form-input
 
     @Valid，@NotNull，@NotEmpty，@Min，@Max：对对象进行格式检测
+  
 - [x] <!-- 第 5 章《数据存储》 -->
 
   - chapter-5-spring-boot-data-jpa
   
     extends JpaRepository
+  
 - [x] <!-- 第 5 章数据分页排序案例 -->
 
   - chapter-5-spring-boot-paging-sorting
@@ -66,19 +72,25 @@
 - [ ] <!-- Spring Boot 整合 Dubbo/ZooKeeper 详解 SOA 案例 -->
   - springboot-dubbo-server
   -  springboot-dubbo-client
+  
 - [x] <!-- Spring Boot 整合 Elasticsearch -->
   
   - springboot-elasticsearch
+  
 - [x] <!-- Spring Boot 集成 FreeMarker -->
   
   - springboot-freemarker
+  
 - [x] <!-- Spring Boot 整合 HBase -->
   
   - springboot-hbase
+  
 - [x] <!-- Spring Boot 之 HelloWorld 详解 -->
   
   - springboot-helloworld
+  
 - [ ] <!-- 数据缓存篇 -->
+
 - [x] <!-- Spring Boot 整合 Mybatis 的完整 Web 案例 -->
   
   - springboot-mybatis
@@ -110,6 +122,7 @@
     	</select>
     </mapper>
     ```
+  
 - [x] <!-- Spring Boot 整合 Mybatis Annotation 注解案例 -->
   
   - springboot-mybatis-annotation
@@ -131,6 +144,7 @@
     ```
   
     
+  
 - [x] <!-- Spring Boot 整合 Mybatis 实现 Druid 多数据源配置 -->
   
   - springboot-mybatis-mutil-datasource
@@ -208,23 +222,56 @@
     ```
   
     
+  
 - [ ] <!-- Spring Boot 整合 Redis 实现缓存 -->
-- springboot-mybatis-redis
+
+  - springboot-mybatis-redis
+
+    ```java
+    @Autowired
+    private RedisTemplate redisTemplate;
+    
+    ValueOperations<String,City> operations = redisTemplate.opsForValue();
+    operations.hasKey(key);
+    operations.get(key);
+    operations.set(key,city,10,TimeUnit.SECONDS);
+    operations.delete(key);
+    ```
+
+    
+
 - [ ] <!-- Spring Boot 注解实现整合 Redis 实现缓存 -->
+
 - springboot-mybatis-redis-annotation
+
 - [ ] <!-- Spring Boot 实现 Restful 服务，基于 HTTP / JSON 传输 -->
+
 - springboot-restful
+
 - [ ] <!-- Spring Boot 之配置文件详解 -->
+
 - springboot-properties
+
 - [ ] <!-- Spring Boot HTTP over JSON 的错误码异常处理 -->
+
 - springboot-validation-over-json
+
 - [ ] <!-- Spring Boot 2.0 WebFlux -->
+
 - [ ] <!-- Spring Boot WebFlux 快速入门 -->
+
 - springboot-webflux-1-quickstart
+
 - [ ] <!-- Spring Boot WebFlux 实现 Restful 服务，基于 HTTP / JSON 传输 -->
+
 - springboot-webflux-2-restful
+
 - springboot-webflux-3-mongodb
+
 - springboot-webflux-4-thymeleaf
+
 - springboot-webflux-5-thymeleaf-mongodb
+
 - springboot-webflux-6-redis
+
 - springboot-webflux-7-redis-cache
