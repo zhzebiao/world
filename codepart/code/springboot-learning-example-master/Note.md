@@ -69,7 +69,7 @@
   
     @Bean：往Spring容器中注入一个Bean对象
   
-- [ ] <!-- Spring Boot 整合 Dubbo/ZooKeeper 详解 SOA 案例 -->
+- [x] <!-- Spring Boot 整合 Dubbo/ZooKeeper 详解 SOA 案例 -->
   - springboot-dubbo-server
   -  springboot-dubbo-client
   
@@ -394,18 +394,18 @@
 
 - [ ] <!-- Spring Boot WebFlux 快速入门 -->
 
-- springboot-webflux-1-quickstart
+  - springboot-webflux-1-quickstart
 
 - [ ] <!-- Spring Boot WebFlux 实现 Restful 服务，基于 HTTP / JSON 传输 -->
 
-- springboot-webflux-2-restful
+  - springboot-webflux-2-restful
 
-- springboot-webflux-3-mongodb
+  - springboot-webflux-3-mongodb
 
-- springboot-webflux-4-thymeleaf
+  - springboot-webflux-4-thymeleaf
 
-- springboot-webflux-5-thymeleaf-mongodb
+  - springboot-webflux-5-thymeleaf-mongodb
 
-- springboot-webflux-6-redis
+  - springboot-webflux-6-redis
 
-- springboot-webflux-7-redis-cache
+  - springboot-webflux-7-redis-cache
