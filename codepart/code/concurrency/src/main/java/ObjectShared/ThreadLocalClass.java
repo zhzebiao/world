@@ -11,17 +11,14 @@ import java.sql.SQLException;
 public class ThreadLocalClass {
 
     private static ThreadLocal<Connection> connectionHolder =
-            new ThreadLocal<Connection>(){
-                @Override
-                public Connection initialValue(){
-                    try {
-                        return DriverManager.getConnection("localhost:3306");
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                    return null;
+            ThreadLocal.withInitial(() -> {
+                try {
+                    return DriverManager.getConnection("localhost:3306");
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
-            };
+                return null;
+            });
     public static Connection getConnection(){
         return connectionHolder.get();
     }

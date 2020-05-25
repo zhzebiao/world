@@ -25,24 +25,21 @@ public class TestCountDownLatch {
         final CountDownLatch endGate = new CountDownLatch(nThreads);
 
         for(int i=0; i < nThreads; i++){
-            Thread t = new Thread(){
-                @Override
-                public void run(){
+            Thread t = new Thread(() -> {
+                try {
+                    // 阻塞，等到开始执行的指令，保证所有线程都同时开始
+                    startGate.await();
                     try {
-                        // 阻塞，等到开始执行的指令，保证所有线程都同时开始
-                        startGate.await();
-                        try {
-                            // 资源初始化操作 or 参与者就绪初始化
-                            task.run();
-                        } finally {
-                            // 标明当前线程初始化结束
-                            endGate.countDown();
-                        }
-                    }catch (InterruptedException e){
-                        e.printStackTrace();
+                        // 资源初始化操作 or 参与者就绪初始化
+                        task.run();
+                    } finally {
+                        // 标明当前线程初始化结束
+                        endGate.countDown();
                     }
+                }catch (InterruptedException e){
+                    e.printStackTrace();
                 }
-            };
+            });
 
             t.start();
         }
