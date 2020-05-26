@@ -45,6 +45,7 @@ public class PrimeGenerator implements Runnable {
         }finally {
             generator.cancel();
         }
+        System.out.println(generator.get());
     }
 
 }
