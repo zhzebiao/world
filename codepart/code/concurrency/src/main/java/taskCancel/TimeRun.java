@@ -33,16 +33,19 @@ public class TimeRun {
 
         RethrowableTask task = new RethrowableTask();
         final Thread taskThread = new Thread(task);
+        // 任务线程启动
         taskThread.start();
         cancelExec.schedule(new Runnable() {
+            // 需要在taskThread中运行的Task能够响应中断
             @Override
             public void run() {
                 taskThread.interrupt();
             }
         }, timeout, unit);
 
-
-        taskThread.join(unit.toMillis(timeout));  // 阻塞一段时间,等待程序到时返回
+        // 阻塞一段时间，在一段时间内监控taskThread的状态
+        // join会在taskThread执行完成之后，或者超时的时候返回
+        taskThread.join(unit.toMillis(timeout));
         task.rethrow();
     }
 
@@ -56,6 +59,7 @@ public class TimeRun {
         } catch (TimeoutException e) {
             e.printStackTrace();
         } finally {
+            // mayInterruptIfRunning: true:如果运行则中断 false:如果运行则不进行任何操作
             // 如果任务已经结束，那么执行取消操作也不会带来任何影响
             // 如果任务正在运行，那么将被中断
             task.cancel(true);
