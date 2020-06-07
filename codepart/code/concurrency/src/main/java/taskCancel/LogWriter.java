@@ -26,6 +26,12 @@ public class LogWriter {
         queue.put(msg);
     }
 
+    // 这种直接关闭的做法会丢失那些正在等待被写入到日志的消息。
+    // 当取消一个生产者-消费者操作时，需要同时取消生产者和消费者。
+    public void stop() {
+        logger.interrupt();
+    }
+
     private class LoggerThread extends Thread {
         private final PrintWriter writer;
 
