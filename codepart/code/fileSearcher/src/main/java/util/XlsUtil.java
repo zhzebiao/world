@@ -3,6 +3,7 @@ package util;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -49,7 +50,12 @@ public class XlsUtil {
         OutputStream out;
         try {
             BufferedInputStream bufferInput = new BufferedInputStream(new FileInputStream(targetExcelFile));
-            Workbook workbook = new XSSFWorkbook(bufferInput);
+            Workbook workbook;
+            try {
+                workbook = new XSSFWorkbook(bufferInput);
+            }catch (Exception e){
+                workbook = new HSSFWorkbook(bufferInput);
+            }
             // 遍历Excel表格内的所有sheet
             for (int index = 0; index < workbook.getNumberOfSheets(); index++) {
                 LOG.info(String.format("开始处理第%d个sheet", index + 1));
