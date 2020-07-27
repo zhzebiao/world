@@ -22,8 +22,8 @@ import java.util.Stack;
 public class Main {
 
     private static final String xlsxFloderString = "D:\\xlsx";
-    private static final String patientFloderString = "D:\\\\patientFloder";
-    private static final String outPath = "D\\out";
+    private static final String patientFloderString = "D:\\di\\新建文件夹";
+    private static final String outPath = "D:\\out";
 
     public static void main(String[] args) throws IOException {
         File outPathFile = FileUtil.file(outPath);
@@ -67,6 +67,7 @@ public class Main {
                     if (patientName.equals(record.get("姓名"))) {
 //                        FileUtil.copy(firstFile.getAbsolutePath(), outPathFile + "\\\\" + record.get("药物号") + "+" + patientName + "\\\\" + firstFile.getName(), false);
                         pdf2png(firstFile.getAbsolutePath(), outPathFile + "\\\\" + record.get("药物号") + "+" + patientName + "\\\\", "png");
+                        FileUtil.del(firstFile);
                     }
                 }
             }

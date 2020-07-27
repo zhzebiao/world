@@ -119,7 +119,7 @@ public class XlsUtil {
      */
     private static int getCellNum(String value, Row row) {
         for (int i = 0; i < row.getLastCellNum(); i++) {
-            if (value.trim().equals(row.getCell(i).getStringCellValue().trim())) {
+            if (value.trim().equals(row.getCell(i, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getStringCellValue().trim())) {
                 return i;
             }
         }
