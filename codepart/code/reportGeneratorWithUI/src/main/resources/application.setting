@@ -1,0 +1,4 @@
+[entity]
+姓名=String
+HIS检查ID=String
+Level Date=Date#yyyy年MM月dd号
