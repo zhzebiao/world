@@ -22,7 +22,7 @@
     </build>
 
     <properties>
-        <springVersion>5.2.2.RELEASE</springVersion>
+        <springVersion>5.3.18</springVersion>
     </properties>
 
     <dependencies>
